@@ -21,6 +21,7 @@ public class TestService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        Log.i(TAG, event.toString());
         Random rand = new Random();
         int delayM = 4000 + rand.nextInt(4000);
         if (isClick == false) {
@@ -40,9 +41,12 @@ public class TestService extends AccessibilityService {
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
                     AccessibilityNodeInfo node = getVideoMini();
                     String txt = getVideoContent(node);
-                    if(!videoMap.get(txt)){
+                    Boolean txtStatus = videoMap.get(txt);
+                    if (txtStatus == null || txtStatus == false) {
                         clickShiPingHao(node);
                     }
+                    int level = getLocation();
+                    Log.i(TAG + "level", Integer.toString(level));
 
 
 //                    getThumb();
@@ -93,12 +97,17 @@ public class TestService extends AccessibilityService {
                 if (text != null && text.toString().equals("视频号")) {
                     AccessibilityNodeInfo parent = info.getParent();
                     int c = parent.getChildCount();
-                    Log.i(TAG, parent.toString());
-                    Log.i(TAG, parent.getChild(0).toString());
-                    Log.i(TAG, parent.getChild(1).toString());
-                    Log.i(TAG, parent.getChild(2).toString());
+                    try {
+                        Log.i(TAG, parent.toString());
+                        Log.i(TAG, parent.getChild(0).toString());
+                        Log.i(TAG, parent.getChild(1).toString());
+                        Log.i(TAG, parent.getChild(2).toString());
 
-                    Log.i(TAG, Integer.toString(c));
+                        Log.i(TAG, Integer.toString(c));
+                    } catch (Exception e) {
+
+                    }
+
                     if (parent.getChildCount() != 3) continue;
 
                     Log.i(TAG, parent.getClassName().toString());
@@ -128,6 +137,36 @@ public class TestService extends AccessibilityService {
             }
         }
         return null;
+    }
+
+    private void toLocation(int level){
+
+    }
+
+    /**
+     * @param info
+     */
+    private int getLocation() {
+        AccessibilityNodeInfo node = getNodeByText("视频号");
+        if (isVideoTitle()) {
+            return 2;
+        }
+        return 0;
+    }
+
+    private Boolean isVideoTitle() {
+        AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
+        if (nodeInfo != null) {
+            List<AccessibilityNodeInfo> nodes = nodeInfo.findAccessibilityNodeInfosByViewId("android:id/text1");
+            for (AccessibilityNodeInfo info : nodes) {
+                CharSequence text = info.getText();
+
+                if (text != null && text.toString().equals("视频号")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void clickNode(AccessibilityNodeInfo info) {
